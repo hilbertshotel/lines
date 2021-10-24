@@ -30,14 +30,11 @@ checkTypes :: [String] -> Int -> IO Int
 checkTypes [] result = return result
 checkTypes (first:rest) result = isFolderOrFile first >>= \case
     
-    (True, _) -> do
-      listContents <- listDirectory first
-      let list = extendPaths listContents first
-      numOfLines <- checkTypes list 0
-      checkTypes rest (numOfLines + result)
+    (True, _) -> listDirectory first >>= \listContents ->
+      checkTypes (extendPaths listContents first) 0 >>= \numOfLines ->
+        checkTypes rest (numOfLines + result)
 
-    (_, True) -> do
-      numOfLines <- countLines first
+    (_, True) -> countLines first >>= \numOfLines ->
       checkTypes rest (numOfLines + result)
 
 
